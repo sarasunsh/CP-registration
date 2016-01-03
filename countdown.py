@@ -17,6 +17,11 @@ from argparse import ArgumentParser
 from argparse import ArgumentTypeError
 from datetime import datetime
 from time import sleep
+from time import ctime
+import ntplib
+
+
+TIME_SERVER = 'pool.ntp.org'
 
 
 def _mkdatetime(datestr):
@@ -48,7 +53,12 @@ def date_back(dt, from_date=None, precise=False):
     @return: str, timedelta as human readable string
     """
     if not from_date:
-        from_date = datetime.now()
+#        from_date = datetime.now()
+        c = ntplib.NTPClient()
+        response = c.request(TIME_SERVER)
+        from_date = datetime.fromtimestamp(response.tx_time)
+#        hour = 12 if ((time.hour % 12) == 0) else (time.hour % 12)
+#            minute, second, pm = time.minute, time.second, (time.hour > 11)
 
     if dt < from_date:
         return None
