@@ -55,7 +55,19 @@ def date_back(dt, from_date=None, precise=False):
     if not from_date:
 #        from_date = datetime.now()
         c = ntplib.NTPClient()
-        response = c.request(TIME_SERVER)
+        
+        tries = 0
+        response = None
+        while not response and tries <= 3:
+            tries += 1
+            try:
+                response = c.request(TIME_SERVER)
+            except Exception:
+                print("Error with the time server...")
+        
+        if response is None:
+            raise Exception("Fatal error communicating with the time server")
+                
         from_date = datetime.fromtimestamp(response.tx_time)
 #        hour = 12 if ((time.hour % 12) == 0) else (time.hour % 12)
 #            minute, second, pm = time.minute, time.second, (time.hour > 11)
