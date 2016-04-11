@@ -6,9 +6,10 @@
 
 # Third Party Library Imports
 import requests
-from bs4 import BeautifulSoup
 
-URL = "https://classpass.com/a/VenueClassSchedule"
+studio_URL = "https://classpass.com/a/VenueClassSchedule"
+fave_URL = "https://classpass.com/favorites"
+
 
 def CP_get(venue_id, next_week, COOKIES):
 	payload = {
@@ -23,10 +24,18 @@ def CP_get(venue_id, next_week, COOKIES):
 		'less_days':7,
 	}
 
-	start_url = requests.post(
-	    URL,
+	studio_html = requests.post(
+	    studio_URL,
 	    data=payload,
 	    cookies=COOKIES
 	)
 
-	return start_url.content
+	return studio_html.content
+
+def CP_faves(COOKIES):
+	fave_html = requests.get(
+	    fave_URL,
+	    cookies=COOKIES
+	)
+
+	return fave_html.content
