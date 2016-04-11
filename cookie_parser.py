@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+This program converts the cookies obtained as a string from Chrome into dictionary
+
 Created on Thu May 21 11:16:53 2015
 
 @author: SSunshine

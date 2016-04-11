@@ -10,24 +10,41 @@ from bs4 import BeautifulSoup
 import datetime
 
 # Local Package Imports
-from CP_pull import CP_get
+from CP_pull import CP_get, CP_faves
 from CP_signup import CP_send
 
 COOKIES = {
 
 }
 
+# Function that checks if the input is a valid selection
+## TO DO: better way to do this?
+def error_check(response):
+    try:
+        int(response)
+    except ValueError:
+        print "That is not a number."
+        return True
 
-# Read studiolist from CSV
-## TO DO: remove title row from CSV, pull studio list from favorites page
-reader = csv.reader(open('studiolist.csv'))
+    if int(response) < 0 or int(response) >= len(studio_dict):
+        print "That number does not correspond to a studio."
+        return True
+    else:
+        return False
+
+# Pull list of favorite studios from ClassPass
+## TO DO: use this part to check if cookies are valid? i.e. if the get request doesn't return my favorites
+fave_html = CP_faves(COOKIES)
+studio_deets = BeautifulSoup(fave_html, "lxml")
+favorites = studio_deets.find_all("li", class_="grid__item md-1/2 lg-1/3")
+
 studio_dict = {}
-for row in reader:
-    key = row[0]
-    # Skip duplicates
-    if key in studio_dict:
-        pass
-    studio_dict[key] = row[1]
+
+for fave in favorites:
+    blurb = fave.find("h2")
+    url = blurb.a["href"].split("/")
+    venue_id = fave.find("a").get("data-venue-id")
+    studio_dict[url[-1]] = venue_id
     
 # Display studio options
 for i, name in enumerate(studio_dict.keys()):
@@ -36,27 +53,11 @@ for i, name in enumerate(studio_dict.keys()):
 # Get user input on studio choice 
 response = raw_input("Please enter the studio number: ")
 
-# Prompt if number entered is not valid key
-## TO DO: better way to do this?
-def error_check(response):
-    try:
-        int(response)
-    except ValueError:
-        print "Please enter a number."
-        return True
-
-    if int(response) < 0 or int(response) >= len(studio_dict):
-        print "This number does not correspond to a studio."
-        return True
-    else:
-        return False
-
-if error_check(response):
-    tries = 0
-    while error_check(response) and tries <3:
-        tries += 1
-        response = raw_input("That was not a valid studio number. Try again: ")
-
+# Check if number entered is not valid key
+tries = 0
+while error_check(response) and tries <3:
+    tries += 1
+    response = raw_input("That was not a valid studio number. Try again: ")
 
 venue_id = studio_dict.items()[int(response)][1]
 venue_name = studio_dict.items()[int(response)][0]
@@ -117,7 +118,6 @@ int_r = int(response2)
 print "\n You selected: ", venue_name, class_names[int_r], str(start_times[int_r])+"-"+str(end_times[int_r])
 
 #Use the above information to call sign-up function 
-CP_send(sched_ids[int_r], venue_id, class_ids[int_r], class_names[int_r], COOKIES)
-
+# CP_send(sched_ids[int_r], venue_id, class_ids[int_r], class_names[int_r], COOKIES)
 
 
