@@ -8,6 +8,7 @@
 import csv
 from bs4 import BeautifulSoup
 import datetime
+import sys
 
 # Local Package Imports
 from CP_pull import CP_get, CP_faves
@@ -36,6 +37,14 @@ def error_check(response):
 ## TO DO: use this part to check if cookies are valid? i.e. if the get request doesn't return my favorites
 fave_html = CP_faves(COOKIES)
 studio_deets = BeautifulSoup(fave_html, "lxml")
+
+# Check if cookies are valid
+## TO DO: this is a little hacky -- better way?
+if len(studio_deets.final_all("header", class_="header js-log-state")) == 0:
+    print "Log-in failed. You may need to update your cookies."
+    sys.exit()
+
+
 favorites = studio_deets.find_all("li", class_="grid__item md-1/2 lg-1/3")
 
 studio_dict = {}
