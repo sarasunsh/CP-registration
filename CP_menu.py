@@ -34,7 +34,6 @@ def error_check(response):
         return False
 
 # Pull list of favorite studios from ClassPass
-## TO DO: use this part to check if cookies are valid? i.e. if the get request doesn't return my favorites
 fave_html = CP_faves(COOKIES)
 studio_deets = BeautifulSoup(fave_html, "lxml")
 
@@ -127,6 +126,6 @@ int_r = int(response2)
 print "\n You selected: ", venue_name, class_names[int_r], str(start_times[int_r])+"-"+str(end_times[int_r])
 
 #Use the above information to call sign-up function 
-# CP_send(sched_ids[int_r], venue_id, class_ids[int_r], class_names[int_r], COOKIES)
+CP_send(sched_ids[int_r], venue_id, class_ids[int_r], class_names[int_r], COOKIES)
 
 
