@@ -36,29 +36,17 @@ class ClassPass(object):
         studio_deets = BeautifulSoup(fave_html, "lxml")
         favorites = studio_deets.find_all("li", class_="grid__item md-1/2 lg-1/3")
         studio_dict = {}
-
         for fave in favorites:
             blurb = fave.find("h2")
             url = blurb.a["href"].split("/")
             venue_id = fave.find("a").get("data-venue-id")
             studio_dict[url[-1]] = venue_id
 
-
         # Get next week's date
-        #TO DO: this has a bug. You can't just add 6, because if it's towards the end of the month, it will get bumped
-        # today_date = time.strftime("20%y-%m-%d")
-        now = datetime.now()
-        next_week = now + timedelta(days=6)
-        if next_week.month < 10:
-            month = "0"+str(next_week.month)
-        else:
-            month = str(next_week.month)
-        if next_week.day < 10:
-            day = "0"+str(next_week.day)
-        else:
-            day = str(next_week.day)
-        next_week_s = str(next_week.year)+"-"+month+"-"+day
+        next_week = datetime.now() + timedelta(days=6)
+        next_week_s = next_week.strftime("20%y-%m-%d")
 
+        # Initialize
         self.studio_dict = studio_dict
         self.next_week_s = next_week_s
         self.cookies = COOKIES
@@ -105,8 +93,8 @@ class ClassPass(object):
            end_times.append(item.get('data-end-time'))
            class_dates.append(item.get('data-class-date'))
 
-        # BUG: If there are no classes being offered next week, class_dates[0] will throw an indexing error.
         # Display class schedule options
+        # BUG: If there are no classes being offered next week, class_dates[0] will throw an indexing error.
         print "\n %s offers the following classes on %s:" % (self.venue_name, class_dates[0])
         for j in range(len(class_ids)):
             print j, class_names[j], str(start_times[j])+" - "+str(end_times[j])
