@@ -6,6 +6,7 @@
 
 # Third Party Library Imports
 import requests
+import re
 import sys
 from datetime import date
 from datetime import datetime
@@ -16,56 +17,26 @@ from bs4 import BeautifulSoup
 from CP_pull import CP_get, CP_faves
 from countdown import countdown
 
-
-## Change cookie_parser so it no longer prints but instead stores reformatted cookies
-COOKIES = {
-    '__cfduid': 'deafb60b1f8aa95ace343399570feb4211445813323',
-    'optimizelyEndUserId': 'oeu1445813324715r0.6423624260351062',
-    'TrackJS': 'f8c74065-2074-44ca-b938-0e45bb05d191',
-    '__ar_v4': '4FVLTQMN6JG6JOZ7FW6XXC%3A20151024%3A9%7CKJDLOVCT6VF4TBYXFFRSW3%3A20151024%3A10%7CLMDV4NAO45EOZLWOSAQ5LJ%3A20151024%3A10%7CCBIW2XBJE5HBBHJDOQTAJC%3A20151024%3A1',
-    '__insp_wid': '324523599',
-    '__insp_nv': 'true',
-    '__insp_ref': 'd',
-    '__insp_targlpu': 'https%3A%2F%2Fclasspass.com%2F',
-    '__insp_targlpt': 'ClassPass',
-    '__insp_pad': '1',
-    '__insp_sid': '2845616176',
-    '__insp_uid': '796953234',
-    '__insp_slim': '1454557652250',
-    '_hp2_id.3868021954': '3672005228684763.0206366422.3868550871',
-    'sailthru_hid': '9fcf94234a5f45ec8b2a806ffd511e3f548099032912ffa80a8b57e07101ad1fa4e325a0524db63ce59d0c40',
-    'cpExperimentId': '72',
-    'cpUtmValues': '%7B%22initial_url%22%3A%22%2F%22%7D',
-    'cpGuestView': '44',
-    'cpBasePlan': '36',
-    'optimizelySegments': '%7B%222331020308%22%3A%22false%22%2C%222347780571%22%3A%22gc%22%2C%222362360229%22%3A%22direct%22%2C%223537322437%22%3A%22none%22%7D',
-    'optimizelyBuckets': '%7B%223544160422%22%3A%220%22%7D',
-    '_gat': '1',
-    'bounceClientVisit1678v': '{"lp":"https%3A%2F%2Fclasspass.com%2Flogin%2Ffavorites","r":""}',
-    'cpUser': 'NDIwYmY3MzBiMjBkZmJmY2ZjNGFlNGJlNjhjNDExNDUzNDUzMzc4YzliOTJiM2U2ODEzZTM3ZjMwOGY4ZmNkOQ%3D%3D%7CMzcxODE%3D',
-    'cpVisitorId': '518335952562d5be42735e',
-    'classpass': '4b916dab6d1cc5277a48d10443e80dfb',
-    '_ga': 'GA1.2.1800631415.1445813325',
-    'mp_13a079f3c862893a971ff2215ef81c76_mixpanel': '%7B%22distinct_id%22%3A%20%2237181%22%2C%22%24initial_referrer%22%3A%20%22%24direct%22%2C%22%24initial_referring_domain%22%3A%20%22%24direct%22%2C%22msa_id%22%3A%20%221%22%2C%22msa_name%22%3A%20%22New%20York%20Metro%22%2C%22user_type%22%3A%20%22prospect%22%2C%22count_lifetime_visits%22%3A%202%2C%22first_visit_date%22%3A%20%222016-01-03%22%2C%22guest_view%22%3A%20%22false_base_2%22%2C%22user_id%22%3A%20%2237181%22%2C%22session_start_count%22%3A%2015%2C%22app_platform%22%3A%20%22web%22%2C%22device_type%22%3A%20%22desktop%22%7D',
-    '__srret': '1',
-    '_fbuy': '560a0c51025d0c0419005a5503140c015508150c500d0119500a5c55505a0c03550c0d52',
-    '_fbuy_buckets': '%7B%22bsy-f4y%22%3A%5B22716%2C1461547639143%5D%7D',
-    '__zlcmid': 'XNf3Qzrg2WGkYB',
-    'bounceClientVisit1678': '{"sid":2,"fvt":1456074086,"vid":1461547634716852,"ao":4,"as":0,"vpv":2,"d":"d","lp":"https%3A%2F%2Fclasspass.com%2Flogin%2Ffavorites","r":"","cvt":1461547634,"gcr":49,"m":0,"did":"1876252171476399688","lvt":1461547640,"v":{"user_email":false,"zip_code":false,"ever_logged_in":true,"map_studios_count":0,"map_city_name":0,"user_type":"subscribed"},"campaigns":{"254716":{"lvt":1460209491,"lavid":1},"254724":{"lvt":1457918720,"lavid":1,"la":1457918720,"fsa":1457648332,"as":1,"ao":4}},"hc_home":1}',
-    'cpUserType': 'subscribed',
-    'mp_mixpanel__c': '7'
-}
+# Paste cookies from Chrome here (as unbroken string)
+raw_cook = ''
+ 
 
 class ClassPass(object):
-
-    # Initantiate ClassPass object
+    # Instantiate ClassPass object
     def __init__(self):
+        # Converts the cookies obtained as a string from Chrome into dictionary
+        cook_list = re.split('=|;', raw_cook)
+        i = 0
+        COOKIES = {}
+        while i < (len(cook_list) - 1):
+            if i%2==0:
+                COOKIES[cook_list[i]] = cook_list[i+1]
+            i +=1
+
         # Pull list of favorite studios from ClassPass
         fave_html = CP_faves(COOKIES)
         studio_deets = BeautifulSoup(fave_html, "lxml")
-
         favorites = studio_deets.find_all("li", class_="grid__item md-1/2 lg-1/3")
-
         studio_dict = {}
 
         for fave in favorites:
